@@ -3,6 +3,7 @@ using Fretefy.Test.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Fretefy.Test.Infra.EntityFramework.Repositories
 {
@@ -19,6 +20,8 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
         {
             return _dbSet.AsQueryable();
         }
+
+        public Cidade Get(Guid id) => _dbSet.FirstOrDefault(x => x.Id == id);
 
         public IEnumerable<Cidade> ListByUf(string uf)
         {
