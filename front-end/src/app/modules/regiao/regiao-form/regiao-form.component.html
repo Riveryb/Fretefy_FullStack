@@ -1,33 +1,50 @@
-<h2>{{ editingId ? 'Editar Região' : 'Nova Região' }}</h2>
+<div class="container">
+  <h2 class="page-title">{{ editingId ? 'Editar Região' : 'Cadastro de região' }}</h2>
 
-<form [formGroup]="form" (ngSubmit)="salvar()">
-  <div>
-    <label>Nome *</label><br/>
-    <input type="text" formControlName="nome" />
+  <form class="card form-card form-grid" [formGroup]="form" (ngSubmit)="salvar()">
+    <!-- Nome -->
     <div>
-      <small *ngIf="form.get('nome')?.hasError('required') && form.get('nome')?.touched">Obrigatório.</small>
-      <small *ngIf="form.get('nome')?.hasError('nomeDuplicado') && form.get('nome')?.touched">Já existe uma região com esse nome.</small>
+      <label class="label">Nome da região *</label>
+      <input class="input" type="text" formControlName="nome" placeholder="Ex.: Grande Curitiba">
+      <div class="form-error" *ngIf="form.get('nome')?.touched && form.get('nome')?.hasError('required')">
+        Informe o nome.
+      </div>
+      <div class="form-error" *ngIf="form.get('nome')?.hasError('nomeDuplicado')">
+        Já existe uma região com esse nome.
+      </div>
     </div>
-  </div>
 
-  <div formArrayName="cidades" style="margin-top:12px;">
-    <label>Cidades *</label>
-    <div *ngFor="let c of cidades.controls; let i = index" style="display:flex; gap:8px; align-items:center; margin:6px 0;">
-      <app-cidade-select [formControlName]="i"></app-cidade-select>
-      <button type="button" (click)="removeCidade(i)">Remover</button>
-    </div>
-    <button type="button" (click)="addCidade()">+ Adicionar cidade</button>
-
+    <!-- Cidades -->
     <div>
-      <small *ngIf="cidades.hasError('atLeastOneCity') && (cidades.dirty || cidades.touched)">Informe ao menos uma cidade.</small>
-      <small *ngIf="cidades.hasError('duplicateCities') && (cidades.dirty || cidades.touched)">Há cidades repetidas.</small>
+      <label class="label">Locais da região</label>
+      <div *ngFor="let c of cidades.controls; let i = index" class="city-row" style="margin-bottom:10px;">
+        <!-- seu componente de cidade como FormControl -->
+        <app-cidade-select [formControl]="c"></app-cidade-select>
+
+        <button type="button" class="btn btn-ghost" (click)="removeCidade(i)">
+          Remover
+        </button>
+      </div>
+
+      <button type="button" class="pill" (click)="addCidade()">
+        <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Adicionar local
+      </button>
+
+      <div class="form-error" *ngIf="form.get('cidades')?.touched && form.get('cidades')?.hasError('atLeastOneCity')">
+        Informe ao menos uma cidade.
+      </div>
+      <div class="form-error" *ngIf="form.get('cidades')?.hasError('duplicateCities')">
+        Não repita cidades.
+      </div>
     </div>
-  </div>
 
-  <div style="margin-top:16px;">
-    <button type="submit" [disabled]="loading">Salvar</button>
-    <button type="button" (click)="cancelar()">Cancelar</button>
-  </div>
+    <!-- Ações -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-cancel" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="btn btn-save">Salvar</button>
+    </div>
 
-  <p *ngIf="errorMsg" style="color:#c00;">{{ errorMsg }}</p>
-</form>
+    <div class="form-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+  </form>
+</div>

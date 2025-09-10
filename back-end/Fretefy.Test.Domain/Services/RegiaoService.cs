@@ -76,23 +76,16 @@ namespace Fretefy.Test.Domain.Services
                 var nomeNorm = nome.Trim();
                 if (_regiaoRepo.Query(nomeNorm).Any(r => r.Id != id && r.Nome.Equals(nomeNorm, StringComparison.OrdinalIgnoreCase)))
                     throw new InvalidOperationException("Já existe uma região com esse nome.");
-
                 regiao.Nome = nomeNorm;
             }
 
             if (cidadeIds != null)
             {
                 var ids = cidadeIds.Where(x => x != Guid.Empty).Distinct().ToList();
-                if (!ids.Any())
-                    throw new ArgumentException("Informe ao menos uma cidade.");
+                if (!ids.Any()) throw new ArgumentException("Informe ao menos uma cidade.");
 
-                var existentes = _cidadeRepo.List()
-                                            .Where(c => ids.Contains(c.Id))
-                                            .Select(c => c.Id)
-                                            .ToHashSet();
-
-                if (existentes.Count != ids.Count)
-                    throw new ArgumentException("Alguma cidade informada não existe.");
+                var existentes = _cidadeRepo.List().Where(c => ids.Contains(c.Id)).Select(c => c.Id).ToHashSet();
+                if (existentes.Count != ids.Count) throw new ArgumentException("Alguma cidade informada não existe.");
 
                 regiao.RegiaoCidades.Clear();
                 foreach (var cid in ids)

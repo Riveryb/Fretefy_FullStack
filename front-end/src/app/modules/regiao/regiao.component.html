@@ -1,38 +1,52 @@
-<div style="padding:16px">
-  <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-    <h2 style="margin:0;">Regiões</h2>
-    <div>
-      <a routerLink="/regiao/novo">+ Cadastrar</a>
-    </div>
+<div class="container">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+    <h2 class="page-title" style="margin:0">Regiões</h2>
+
+    <a routerLink="/regiao/novo" class="btn-cadastrar">Cadastrar</a>
   </div>
 
-  <table border="1" width="100%" cellspacing="0" cellpadding="8">
-    <thead>
-      <tr>
-        <th align="left">Nome da região</th>
-        <th align="left">Status</th>
-        <th align="left">Cidades</th>
-        <th align="left" style="width:210px;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let r of (regioes$ | async) || []">
-        <td>{{ r.nome }}</td>
-        <td>{{ r.ativo ? 'Ativo' : 'Inativo' }}</td>
-        <td>
-          <ng-container *ngIf="r.regiaoCidades && r.regiaoCidades.length; else sem">
-            <ng-container *ngFor="let rc of r.regiaoCidades; let last = last">
-              {{ rc.cidade?.nome }}/{{ rc.cidade?.uf }}<span *ngIf="!last"> | </span>
+  <div class="card table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nome da região</th>
+          <th>Status</th>
+          <th>Cidades</th>
+          <th style="width:64px; text-align:right;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of (regioes$ | async) || []">
+          <td>{{ r.nome }}</td>
+          <td>
+            <span [style.color]="r.ativo ? '#167d2e' : '#8a1f1f'">
+              {{ r.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+          <td>
+            <ng-container *ngIf="r.regiaoCidades?.length; else sem">
+              <ng-container *ngFor="let rc of r.regiaoCidades; let last = last">
+                {{ rc.cidade?.nome }}/{{ rc.cidade?.uf }}<span *ngIf="!last"> | </span>
+              </ng-container>
             </ng-container>
-          </ng-container>
-          <ng-template #sem>-</ng-template>
-        </td>
-        <td>
-          <a [routerLink]="['/regiao', r.id, 'editar']">Editar</a>
-          <button *ngIf="r.ativo" (click)="desativar(r)" style="margin-left:8px;">Desativar</button>
-          <button *ngIf="!r.ativo" (click)="ativar(r)" style="margin-left:8px;">Ativar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+            <ng-template #sem>-</ng-template>
+          </td>
+          <td style="text-align:right;">
+            <details class="kebab">
+              <summary class="kebab-btn" aria-label="Ações">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                </svg>
+              </summary>
+              <div class="menu">
+                <a [routerLink]="['/regiao', r.id, 'editar']">Editar</a>
+                <button *ngIf="r.ativo" class="btn-ghost" (click)="desativar(r)">Desativar</button>
+                <button *ngIf="!r.ativo" class="btn-ghost" (click)="ativar(r)">Ativar</button>
+              </div>
+            </details>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

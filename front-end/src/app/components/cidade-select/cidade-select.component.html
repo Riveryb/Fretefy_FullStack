@@ -1,11 +1,11 @@
 <select
-  #sel
   [disabled]="disabled"
-  [value]="value ? value : ''"
-  (change)="onSelectChange(sel.value)"
+  [(ngModel)]="value"
+  [ngModelOptions]="{ standalone: true }"
+  (ngModelChange)="onModelChange($event)"
 >
   <option value="">Selecione...</option>
-  <option *ngFor="let c of (cidades$ | async)" [value]="c.id">
+  <option *ngFor="let c of cidades" [ngValue]="c.id">
     {{ c.nome }}/{{ c.uf }}
   </option>
 </select>

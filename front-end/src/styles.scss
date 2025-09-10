@@ -1,10 +1,323 @@
-/* You can add global styles to this file, and also import other style files */
-* {
-    font-family: Nunito Sans,Segoe UI,Helvetica Neue,Arial,sans-serif;
+/* ===========================
+   Tema base / Reset suave
+   =========================== */
+:root{
+  --bg: #eef3f7;
+  --card: #ffffff;
+  --text: #1f2d3d;
+  --muted: #6b7a90;
+  --border: #e1e7ef;
+
+  --primary: #0f6fec;       /* azul */
+  --primary-600:#0c5cc4;
+  --primary-50:#e8f1fe;
+
+  --danger: #e5484d;
+  --danger-600:#c23a3e;
+  --danger-50:#fdecee;
+
+  --ring: #96c2ff;
+  --shadow: 0 6px 18px rgba(17, 24, 39, 0.08);
+  --radius: 12px;
 }
 
-html, body {
-    padding: 0;
-    margin: 0;
-    background-color: #dfe6e9;
+*{ box-sizing: border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* layout base */
+.container{
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.page-title{
+  font-size: 28px;
+  font-weight: 700;
+  margin: 8px 0 20px;
+}
+
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* toolbar simples */
+header.toolbar{
+  background: #576572;
+  color: #fff;
+}
+header.toolbar .wrap{
+  max-width: 1100px; margin: 0 auto; padding: 14px 16px;
+  display:flex; gap:24px; align-items:center;
+}
+header.toolbar a{ color:#fff; text-decoration:none; opacity:.9; }
+header.toolbar a.active{ opacity:1; font-weight:600; }
+
+/* ===========================
+   Botões base + variantes
+   =========================== */
+.btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s ease;
+  text-decoration: none;
+}
+.btn:hover{ box-shadow: var(--shadow); transform: translateY(-1px); }
+.btn:disabled{ opacity:.5; pointer-events:none; }
+
+.btn-primary{
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover{ background: var(--primary-600); }
+
+.btn-ghost{ background: #fff; color: var(--text); }
+
+.btn-danger{
+  background: var(--danger); border-color: var(--danger);
+  color:#fff;
+}
+.btn-danger:hover{ background: var(--danger-600); }
+
+/* ícones simples */
+.icon{ width:18px; height:18px; display:inline-block; }
+
+/* ===========================
+   Inputs / selects
+   =========================== */
+.input, .select{
+  width:100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background:#fff;
+  outline:none;
+  transition:.2s;
+  font: inherit;
+}
+.input:focus, .select:focus, .cvafocus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-50);
+}
+
+/* label + ajuda */
+.label{ display:block; font-weight:600; margin-bottom:8px; }
+.help{ color: var(--muted); font-size: 12.5px; }
+
+/* alertas/erros do form */
+.form-error{
+  margin-top:8px; color: var(--danger);
+  font-weight:600;
+}
+
+/* ===========================
+   Tabela
+   =========================== */
+.table-wrap{ overflow:auto; }
+.table{
+  width:100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table thead th{
+  background: #eaf3ff;
+  color: #0e2e5c;
+  font-weight: 700;
+  text-align: left;
+  padding: 14px 16px;
+  position: sticky; top:0;
+}
+.table thead th:first-child{ border-top-left-radius: 10px; }
+.table thead th:last-child { border-top-right-radius: 10px; }
+.table tbody td{
+  border-top:1px solid var(--border);
+  padding: 14px 16px;
+  vertical-align: top;
+  background:#fff;
+}
+.table tbody tr:hover td{ background:#fbfdff; }
+
+/* ===========================
+   Kebab menu (3 pontinhos)
+   =========================== */
+.kebab{ position: relative; }
+.kebab summary{ list-style:none; }
+.kebab summary::-webkit-details-marker{ display:none; }
+
+.kebab-btn{
+  width:38px; height:38px; border-radius:10px;
+  border:1px solid var(--border);
+  background:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:.2s;
+}
+.kebab-btn:hover{ box-shadow: var(--shadow); }
+
+.kebab[open] .menu{ display:block; }
+
+.menu{
+  display:none;
+  position:absolute; right:0; top:46px; z-index: 10;
+  min-width: 180px;
+  background:#fff; border:1px solid var(--border); border-radius:12px;
+  box-shadow: var(--shadow); padding:6px;
+}
+.menu a, .menu button{
+  appearance:none;
+  width:100%;
+  text-align:center;          /* centralizado */
+  background:transparent; border:0; color:var(--text);
+  padding:10px 12px; border-radius:8px; cursor:pointer;
+  font: inherit; font-weight:600;
+  text-decoration:none;       /* sem sublinhado */
+  display:block;
+}
+.menu a:hover, .menu button:hover{ background:#f5f8fe; text-decoration:none; }
+
+/* ===========================
+   Grid do form
+   =========================== */
+.form-card{ padding: 22px; }
+.form-grid{ display:grid; gap:16px; }
+
+.city-row{
+  display:grid; grid-template-columns: 1fr auto;
+  gap:12px;
+}
+
+.pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 14px; border-radius:999px;
+  background:#f3f6fb; border:1px dashed var(--border);
+  color:#233; cursor:pointer;
+}
+.pill:hover{ border-color: var(--primary); background: #f7faff; }
+
+/* ===========================
+   Home centrada
+   =========================== */
+.home-hero{
+  min-height: calc(100vh - 72px);
+  display:flex; align-items:center; justify-content:center;
+}
+.home-hero img{
+  width: 220px; height:auto; filter: drop-shadow(var(--shadow));
+}
+
+/* ===========================
+   Select bonito (nativo estilizado)
+   =========================== */
+select,
+.select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  width: 100%;
+  background:
+    #fff
+    url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='18' height='18' fill='none' stroke='%236b7a90' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>\
+<polyline points='6 8 10 12 14 8'/></svg>") no-repeat right 12px center;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 38px 10px 12px;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.2;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+select:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-50);
+}
+@media (hover:hover) {
+  select:hover,
+  .select:hover { background-color: #fbfdff; }
+}
+select:disabled,
+.select:disabled {
+  background-color: #f6f8fb;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+select.is-invalid,
+.select.is-invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px var(--danger-50);
+}
+select::-ms-expand { display: none; }
+.select--sm { padding: 8px 34px 8px 10px; border-radius: 8px; }
+
+/* ===========================
+   Ações do formulário (rodapé)
+   =========================== */
+.form-actions{
+  display:flex; justify-content:flex-end; gap:12px;
+  padding-top:16px; border-top:1px solid var(--border);
+}
+
+/* Cancelar — pill cinza */
+.btn-cancel{
+  background:#e9eff5; border-color:#e9eff5; color:#233;
+  border-radius:12px; padding:10px 18px; font-weight:600;
+}
+.btn-cancel:hover{ background:#dfe8f0; }
+
+/* Salvar — azul escuro */
+.btn-save{
+  background:#0b2f47; border-color:#0b2f47; color:#fff;
+  border-radius:12px; padding:10px 18px; font-weight:700;
+  box-shadow: 0 6px 18px rgba(11,47,71,.18);
+}
+.btn-save:hover{ background:#09283c; }
+.btn-save:focus{ box-shadow:0 0 0 4px rgba(11,47,71,.18); outline:none; }
+
+/* ===========================
+   Pills de ação
+   =========================== */
+.btn-add,
+.btn-cadastrar{
+  display:inline-flex; align-items:center; gap:10px;
+  background:#e9eff5; border:1px solid #dde7f0; color:#233;
+  border-radius:999px; padding:10px 16px; font-weight:600;
+}
+.btn-add:hover, .btn-cadastrar:hover{ background:#dfe8f0; }
+
+/* bolinha com “+” – sem alterar HTML */
+.btn-cadastrar{
+  position:relative; padding-left:42px; /* espaço pro ícone */
+}
+.btn-cadastrar::before{
+  content:"+"; position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:22px; height:22px; border-radius:50%;
+  display:grid; place-items:center;
+  background:#fff; box-shadow:0 0 0 1px #cfd9e3 inset;
+  font-weight:800; line-height:1;
+}
+
+/* (se você já usa um span .ic no .btn-add, mantemos) */
+.btn-add .ic{
+  width:20px; height:20px; display:inline-grid; place-items:center;
+  border-radius:50%; background:#fff; box-shadow:0 0 0 1px #cfd9e3 inset;
+  font-weight:800; line-height:1;
 }
