@@ -1,42 +1,43 @@
-﻿using Fretefy.Test.Domain.Entities;
+﻿using System;
+using System.Collections.Generic;
+using Fretefy.Test.Domain.Entities;
 using Fretefy.Test.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 
 namespace Fretefy.Test.WebApi.Controllers
 {
-    [Route("api/cidade")]
     [ApiController]
+    [Route("api/[controller]")]
     public class CidadeController : ControllerBase
     {
-        private readonly ICidadeService _cidadeService;
+        private readonly ICidadeService _service;
+        public CidadeController(ICidadeService service) => _service = service;
 
-        public CidadeController(ICidadeService cidadeService)
-        {
-            _cidadeService = cidadeService;
-        }
-
+        // GET /api/cidade?uf=PR&terms=Curit
         [HttpGet]
         public IActionResult List([FromQuery] string uf, [FromQuery] string terms)
         {
             IEnumerable<Cidade> cidades;
-
-            if (!string.IsNullOrEmpty(terms))
-                cidades = _cidadeService.Query(terms);
-            else if (!string.IsNullOrEmpty(uf))
-                cidades = _cidadeService.ListByUf(uf);
-            else
-                cidades = _cidadeService.List();
+            if (!string.IsNullOrWhiteSpace(terms)) cidades = _service.Query(terms);
+            else if (!string.IsNullOrWhiteSpace(uf)) cidades = _service.ListByUf(uf);
+            else cidades = _service.List();
 
             return Ok(cidades);
         }
 
-        [HttpGet("{id}")]
+        // GET /api/cidade/{id}
+        [HttpGet("{id:guid}")]
         public IActionResult Get(Guid id)
         {
-            var cidades = _cidadeService.Get(id);
-            return Ok(cidades);
+            try
+            {
+                var cidade = _service.Get(id);
+                return Ok(cidade);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { mensagem = ex.Message, id });
+            }
         }
     }
 }

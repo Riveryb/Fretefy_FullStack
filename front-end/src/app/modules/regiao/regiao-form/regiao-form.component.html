@@ -1,0 +1,33 @@
+<h2>{{ editingId ? 'Editar Região' : 'Nova Região' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <div>
+    <label>Nome *</label><br/>
+    <input type="text" formControlName="nome" />
+    <div>
+      <small *ngIf="form.get('nome')?.hasError('required') && form.get('nome')?.touched">Obrigatório.</small>
+      <small *ngIf="form.get('nome')?.hasError('nomeDuplicado') && form.get('nome')?.touched">Já existe uma região com esse nome.</small>
+    </div>
+  </div>
+
+  <div formArrayName="cidades" style="margin-top:12px;">
+    <label>Cidades *</label>
+    <div *ngFor="let c of cidades.controls; let i = index" style="display:flex; gap:8px; align-items:center; margin:6px 0;">
+      <app-cidade-select [formControlName]="i"></app-cidade-select>
+      <button type="button" (click)="removeCidade(i)">Remover</button>
+    </div>
+    <button type="button" (click)="addCidade()">+ Adicionar cidade</button>
+
+    <div>
+      <small *ngIf="cidades.hasError('atLeastOneCity') && (cidades.dirty || cidades.touched)">Informe ao menos uma cidade.</small>
+      <small *ngIf="cidades.hasError('duplicateCities') && (cidades.dirty || cidades.touched)">Há cidades repetidas.</small>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;">
+    <button type="submit" [disabled]="loading">Salvar</button>
+    <button type="button" (click)="cancelar()">Cancelar</button>
+  </div>
+
+  <p *ngIf="errorMsg" style="color:#c00;">{{ errorMsg }}</p>
+</form>

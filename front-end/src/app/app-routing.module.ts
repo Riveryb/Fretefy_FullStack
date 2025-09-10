@@ -16,9 +16,9 @@ const routes: Routes = [
     path: 'regiao',
     loadChildren: () => import('./modules/regiao/regiao.module').then(m => m.RegiaoModule)
   },
-  { 
-    path: '**', 
-    redirectTo: '/home' 
+  {
+    path: '**',
+    redirectTo: '/home'
   }
 ];
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Fretefy.Test.Domain.Entities
 {
@@ -6,10 +7,10 @@ namespace Fretefy.Test.Domain.Entities
     {
         public Cidade()
         {
-        
+            RegiaoCidades = new List<RegiaoCidade>();
         }
 
-        public Cidade(string nome, string uf)
+        public Cidade(string nome, string uf) : this()
         {
             Id = Guid.NewGuid();
             Nome = nome;
@@ -17,9 +18,8 @@ namespace Fretefy.Test.Domain.Entities
         }
 
         public Guid Id { get; set; }
-
         public string Nome { get; set; }
-
         public string UF { get; set; }
+        public ICollection<RegiaoCidade> RegiaoCidades { get; set; }
     }
 }

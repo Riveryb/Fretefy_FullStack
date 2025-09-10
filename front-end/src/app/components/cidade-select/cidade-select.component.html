@@ -1,0 +1,11 @@
+<select
+  #sel
+  [disabled]="disabled"
+  [value]="value ? value : ''"
+  (change)="onSelectChange(sel.value)"
+>
+  <option value="">Selecione...</option>
+  <option *ngFor="let c of (cidades$ | async)" [value]="c.id">
+    {{ c.nome }}/{{ c.uf }}
+  </option>
+</select>

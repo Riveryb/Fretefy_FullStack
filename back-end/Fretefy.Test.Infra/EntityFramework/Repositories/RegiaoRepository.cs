@@ -1,37 +1,74 @@
+using Fretefy.Test.Domain.Entities;
+using Fretefy.Test.Domain.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Fretefy.Test.Domain.Entities;
-using Fretefy.Test.Domain.Interfaces.Repositories;
 
 namespace Fretefy.Test.Infra.EntityFramework.Repositories
 {
-    public class RegiaoRepository : IRegiaoRepository
+    public class RegiaoRepository : Repository<Regiao>, IRegiaoRepository
     {
-        private static readonly List<Regiao> _store = new List<Regiao>();
+        public RegiaoRepository(TestDbContext ctx) : base(ctx) { }
 
-        public IQueryable<Regiao> List() => _store.AsQueryable();
-        public Regiao Get(Guid id) => _store.FirstOrDefault(r => r.Id == id);
-        public void Add(Regiao r) => _store.Add(r);
-        public void Update(Regiao r)
+        public Regiao GetWithCidades(Guid id)
         {
-            var i = _store.FindIndex(x => x.Id == r.Id);
-            if (i < 0) throw new ArgumentException("Região não encontrada.");
-            _store[i] = r;
+            return _ctx.Regioes
+                       .Include(r => r.RegiaoCidades)
+                           .ThenInclude(rc => rc.Cidade)
+                       .AsNoTracking()
+                       .FirstOrDefault(r => r.Id == id);
         }
-        public void Delete(Guid id)
+
+        public Regiao GetWithCidadesTracked(Guid id)
         {
-            var r = Get(id);
-            if (r == null) throw new ArgumentException("Região não encontrada.");
-            _store.Remove(r);
+            return _ctx.Regioes
+                    .Include(r => r.RegiaoCidades)
+                    .FirstOrDefault(r => r.Id == id);
         }
+
+        public IEnumerable<Regiao> ListWithCidades()
+        {
+            return _ctx.Regioes
+                       .Include(r => r.RegiaoCidades)
+                           .ThenInclude(rc => rc.Cidade)
+                       .AsNoTracking()
+                       .OrderBy(r => r.Nome)
+                       .ToList();
+        }
+
         public IEnumerable<Regiao> Query(string terms)
         {
-            if (string.IsNullOrWhiteSpace(terms)) return _store;
-            terms = terms.Trim().ToLowerInvariant();
-            return _store.Where(r => (r.Nome ?? "").ToLowerInvariant().Contains(terms));
+            terms = (terms ?? "").Trim();
+            if (string.IsNullOrEmpty(terms))
+                return Enumerable.Empty<Regiao>();
+
+            return _ctx.Regioes
+                       .AsNoTracking()
+                       .Where(r => EF.Functions.Like(r.Nome, $"%{terms}%"))
+                       .OrderBy(r => r.Nome)
+                       .ToList();
         }
-        public bool ExistsByName(string nome) =>
-            _store.Any(r => string.Equals(r.Nome?.Trim(), (nome ?? "").Trim(), StringComparison.OrdinalIgnoreCase));
+
+        public IEnumerable<Regiao> List(bool? ativo = null)
+        {
+            var q = _ctx.Regioes.AsNoTracking();
+            if (ativo.HasValue) q = q.Where(r => r.Ativo == ativo.Value);
+            return q.OrderBy(r => r.Nome).ToList();
+        }
+
+        public bool ExistsByName(string nome, Guid? ignoreId = null)
+        {
+            if (string.IsNullOrWhiteSpace(nome)) return false;
+            var norm = nome.Trim().ToLower();
+
+            var q = _ctx.Regioes.AsNoTracking()
+                .Where(r => r.Nome.ToLower() == norm);
+
+            if (ignoreId.HasValue)
+                q = q.Where(r => r.Id != ignoreId.Value);
+
+            return q.Any();
+        }
     }
 }

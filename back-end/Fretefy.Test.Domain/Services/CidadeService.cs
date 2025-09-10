@@ -3,37 +3,39 @@ using Fretefy.Test.Domain.Interfaces;
 using Fretefy.Test.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fretefy.Test.Domain.Services
 {
     public class CidadeService : ICidadeService
     {
-        private readonly ICidadeRepository _cidadeRepository;
+        private readonly ICidadeRepository _cidadeRepo;
 
-        public CidadeService(ICidadeRepository cidadeRepository)
+        public CidadeService(ICidadeRepository cidadeRepo)
         {
-            _cidadeRepository = cidadeRepository;
+            _cidadeRepo = cidadeRepo;
         }
 
         public Cidade Get(Guid id)
         {
-            return _cidadeRepository.List().FirstOrDefault(f => f.Id == id);
+            var cidade = _cidadeRepo.Get(id);
+            if (cidade == null) throw new ArgumentException("Cidade não encontrada.");
+            return cidade;
         }
 
-        public IEnumerable<Cidade> List()
-        {
-            return _cidadeRepository.List();
-        }
+        public IEnumerable<Cidade> List() => _cidadeRepo.List();
 
         public IEnumerable<Cidade> ListByUf(string uf)
         {
-            return _cidadeRepository.ListByUf(uf);
+            if (string.IsNullOrWhiteSpace(uf))
+                throw new ArgumentException("UF é obrigatória.");
+            return _cidadeRepo.ListByUf(uf.Trim());
         }
 
         public IEnumerable<Cidade> Query(string terms)
         {
-            return _cidadeRepository.Query(terms);
+            if (string.IsNullOrWhiteSpace(terms))
+                return new List<Cidade>();
+            return _cidadeRepo.Query(terms.Trim());
         }
     }
 }

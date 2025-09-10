@@ -3,35 +3,33 @@ using Fretefy.Test.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace Fretefy.Test.Infra.EntityFramework.Repositories
 {
-    public class CidadeRepository : ICidadeRepository
+    public class CidadeRepository : Repository<Cidade>, ICidadeRepository
     {
-        private DbSet<Cidade> _dbSet;
-
-        public CidadeRepository(DbContext dbContext)
-        {
-            _dbSet = dbContext.Set<Cidade>();
-        }
-
-        public IQueryable<Cidade> List()
-        {
-            return _dbSet.AsQueryable();
-        }
-
-        public Cidade Get(Guid id) => _dbSet.FirstOrDefault(x => x.Id == id);
+        public CidadeRepository(TestDbContext ctx) : base(ctx) { }
 
         public IEnumerable<Cidade> ListByUf(string uf)
         {
-            return _dbSet.Where(w => EF.Functions.Like(w.UF, $"%{uf}%"));
+            uf = (uf ?? "").Trim().ToUpperInvariant();
+
+            return _set.AsNoTracking()
+                       .Where(c => c.UF == uf)
+                       .OrderBy(c => c.Nome)
+                       .ToList();
         }
 
         public IEnumerable<Cidade> Query(string terms)
         {
+            terms = (terms ?? "").Trim();
+            if (string.IsNullOrEmpty(terms))
+                return Enumerable.Empty<Cidade>();
 
-            return _dbSet.Where(w => EF.Functions.Like(w.Nome, $"%{terms}%") || EF.Functions.Like(w.UF, $"%{terms}%"));
+            return _set.AsNoTracking()
+                       .Where(c => EF.Functions.Like(c.Nome, $"%{terms}%"))
+                       .OrderBy(c => c.Nome)
+                       .ToList();
         }
     }
 }

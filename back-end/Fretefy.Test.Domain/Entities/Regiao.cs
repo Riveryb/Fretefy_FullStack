@@ -7,26 +7,17 @@ namespace Fretefy.Test.Domain.Entities
     {
         public Regiao()
         {
-
+            RegiaoCidades = new List<RegiaoCidade>(); Ativo = true;
         }
 
-        public Regiao(string nome, List<Cidade> cidades)
+        public Regiao(string nome) : this()
         {
-            Id = Guid.NewGuid();
-            Nome = nome;
-            _cidades = cidades ?? new List<Cidade>();
+            Id = Guid.NewGuid(); Nome = nome;
         }
 
         public Guid Id { get; set; }
-
         public string Nome { get; set; }
-
-        private readonly List<Cidade> _cidades = new List<Cidade>();
-
-        public IReadOnlyCollection<Cidade> Cidades => _cidades.AsReadOnly();
-
-        public void AdicionarCidade(Cidade cidade) => _cidades.Add(cidade);
-
-        public void RemoverCidade(Cidade cidade) => _cidades.Remove(cidade);
+        public bool Ativo { get; set; }
+        public ICollection<RegiaoCidade> RegiaoCidades { get; set; }
     }
 }

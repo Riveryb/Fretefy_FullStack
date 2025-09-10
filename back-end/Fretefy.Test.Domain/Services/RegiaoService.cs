@@ -20,84 +20,116 @@ namespace Fretefy.Test.Domain.Services
 
         public Regiao Get(Guid id)
         {
-            var regiao = _regiaoRepo.Get(id);
+            var regiao = _regiaoRepo.GetWithCidades(id);
             if (regiao == null) throw new ArgumentException("Região não encontrada.");
             return regiao;
         }
 
-        public IEnumerable<Regiao> List() =>
-            _regiaoRepo.List().ToList();
+        public IEnumerable<Regiao> List() => _regiaoRepo.List();
 
-        public IEnumerable<Regiao> Query(string terms) =>
-            _regiaoRepo.Query(terms);
+        public IEnumerable<Regiao> List(bool? ativo) => _regiaoRepo.List(ativo);
+
+        public IEnumerable<Regiao> ListWithCidades() => _regiaoRepo.ListWithCidades();
+
+        public IEnumerable<Regiao> Query(string terms) => _regiaoRepo.Query(terms);
 
         public Regiao Create(string nome, IEnumerable<Guid> cidadeIds)
         {
+            nome = (nome ?? "").Trim();
             if (string.IsNullOrWhiteSpace(nome))
                 throw new ArgumentException("Nome da região é obrigatório.");
 
-            if (_regiaoRepo.ExistsByName(nome.Trim()))
-                throw new ArgumentException("Já existe uma região com esse nome.");
+            if (_regiaoRepo.Query(nome).Any(r => r.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidOperationException("Já existe uma região com esse nome.");
 
-            var cidades = ResolveCidades(cidadeIds);
+            var ids = (cidadeIds ?? Enumerable.Empty<Guid>())
+                      .Where(id => id != Guid.Empty)
+                      .Distinct()
+                      .ToList();
 
-            var regiao = new Regiao(nome.Trim(), cidades);
-            _regiaoRepo.Add(regiao);
-            return regiao;
+            if (!ids.Any())
+                throw new ArgumentException("Informe ao menos uma cidade.");
+
+            var existentes = _cidadeRepo.List()
+                                        .Where(c => ids.Contains(c.Id))
+                                        .Select(c => c.Id)
+                                        .ToHashSet();
+
+            if (existentes.Count != ids.Count)
+                throw new ArgumentException("Alguma cidade informada não existe.");
+
+            var regiao = new Regiao(nome);
+
+            foreach (var id in ids)
+                regiao.RegiaoCidades.Add(new RegiaoCidade(regiao.Id, id));
+
+            return _regiaoRepo.Add(regiao);
         }
 
         public Regiao Update(Guid id, string nome, IEnumerable<Guid> cidadeIds)
         {
-            var regiao = _regiaoRepo.Get(id);
+            var regiao = _regiaoRepo.GetWithCidadesTracked(id);
             if (regiao == null) throw new ArgumentException("Região não encontrada.");
 
             if (!string.IsNullOrWhiteSpace(nome))
             {
-                var novoNome = nome.Trim();
-                if (!novoNome.Equals(regiao.Nome, StringComparison.OrdinalIgnoreCase)
-                    && _regiaoRepo.ExistsByName(novoNome))
-                    throw new ArgumentException("Já existe uma região com esse nome.");
-                regiao.Nome = novoNome;
+                var nomeNorm = nome.Trim();
+                if (_regiaoRepo.Query(nomeNorm).Any(r => r.Id != id && r.Nome.Equals(nomeNorm, StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException("Já existe uma região com esse nome.");
+
+                regiao.Nome = nomeNorm;
             }
 
             if (cidadeIds != null)
             {
-                var cidades = ResolveCidades(cidadeIds);
-                // recria a lista com encapsulamento via métodos
-                // limpa
-                foreach (var c in regiao.Cidades.ToList())
-                    regiao.RemoverCidade(c);
-                // adiciona
-                foreach (var c in cidades)
-                    regiao.AdicionarCidade(c);
+                var ids = cidadeIds.Where(x => x != Guid.Empty).Distinct().ToList();
+                if (!ids.Any())
+                    throw new ArgumentException("Informe ao menos uma cidade.");
+
+                var existentes = _cidadeRepo.List()
+                                            .Where(c => ids.Contains(c.Id))
+                                            .Select(c => c.Id)
+                                            .ToHashSet();
+
+                if (existentes.Count != ids.Count)
+                    throw new ArgumentException("Alguma cidade informada não existe.");
+
+                regiao.RegiaoCidades.Clear();
+                foreach (var cid in ids)
+                    regiao.RegiaoCidades.Add(new RegiaoCidade(regiao.Id, cid));
             }
 
-            _regiaoRepo.Update(regiao);
-            return regiao;
+            return _regiaoRepo.Update(regiao);
         }
 
         public void Delete(Guid id)
         {
-            // poderia validar regras, ex: impedir delete se vinculada a algo
             _regiaoRepo.Delete(id);
         }
 
-        private List<Cidade> ResolveCidades(IEnumerable<Guid> ids)
+        public Regiao Ativar(Guid id)
         {
-            var list = new List<Cidade>();
-            if (ids == null) return list;
-
-            var idSet = new HashSet<Guid>(ids);
-            foreach (var id in idSet)
+            var regiao = _regiaoRepo.Get(id) ?? throw new ArgumentException("Região não encontrada.");
+            if (!regiao.Ativo)
             {
-                // Ideal: ter ICidadeRepository.Get(Guid)
-                // fallback: _cidadeRepo.List().FirstOrDefault(x => x.Id == id)
-                // Aqui vou assumir que existe Get(Guid)
-                var c = _cidadeRepo.Get(id);
-                if (c == null) throw new ArgumentException($"Cidade {id} não encontrada.");
-                list.Add(c);
+                regiao.Ativo = true;
+                _regiaoRepo.Update(regiao);
             }
-            return list;
+            return regiao;
         }
+
+        public Regiao Desativar(Guid id)
+        {
+            var regiao = _regiaoRepo.Get(id) ?? throw new ArgumentException("Região não encontrada.");
+            if (regiao.Ativo)
+            {
+                regiao.Ativo = false;
+                _regiaoRepo.Update(regiao);
+            }
+            return regiao;
+        }
+
+        public bool ExistsByName(string nome, Guid? ignoreId = null)
+            => _regiaoRepo.ExistsByName(nome, ignoreId);
     }
 }
